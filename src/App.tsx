@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
+import React, { useEffect, useState } from "react";
 /**
  * DSA Playground – Single‑file React app
  * -------------------------------------
@@ -14,13 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
  * - Strings: KMP substring search
  * - Hash Table: Separate chaining demo (simple)
  * - Bench: small runner to time algorithms
- *
- * How to use:
- * 1) Create a Vite + React + TS app (or CRA) and replace App.tsx with this file's default export.
- * 2) Ensure Tailwind is enabled (optional but recommended). The UI uses Tailwind classes.
- * 3) Run `npm run dev` locally; deploy to Vercel/Netlify in minutes.
  */
-
 // ----------------------------- Utils ----------------------------------
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const rnd = (n: number, max = 99) => Array.from({ length: n }, () => Math.floor(Math.random() * (max + 1)));
@@ -147,7 +140,14 @@ class Queue<T> {
 }
 
 // ----------------------------- Linked List ----------------------------
-class ListNode<T> { constructor(public val: T, public next: ListNode<T> | null = null) {} }
+class ListNode<T> {
+  val: T;
+  next: ListNode<T> | null;
+  constructor(val: T, next: ListNode<T> | null = null) {
+    this.val = val;
+    this.next = next;
+  }
+}
 class SinglyLinkedList<T> {
   head: ListNode<T> | null = null;
   insertAtHead(val: T) { const n = new ListNode(val, this.head); this.head = n; }
@@ -167,7 +167,17 @@ class SinglyLinkedList<T> {
 }
 
 // ----------------------------- Trees (BST) ----------------------------
-class BSTNode { constructor(public key: number, public left: BSTNode | null = null, public right: BSTNode | null = null) {} }
+class BSTNode {
+  key: number;
+  left: BSTNode | null;
+  right: BSTNode | null;
+
+  constructor(key: number, left: BSTNode | null = null, right: BSTNode | null = null) {
+    this.key = key;
+    this.left = left;
+    this.right = right;
+  }
+}
 class BST {
   root: BSTNode | null = null;
   insert(key: number) { this.root = this._insert(this.root, key); }
@@ -267,13 +277,57 @@ function kmpSearch(text: string, pat: string) {
 // ----------------------------- Hash Table (chaining) ------------------
 class HashTable<K extends string | number, V> {
   private buckets: [K, V][][];
-  constructor(private capacity = 17) { this.buckets = Array.from({ length: capacity }, () => []); }
-  private hash(key: K) { const s = String(key); let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h % this.capacity; }
-  set(key: K, value: V) { const idx = this.hash(key); const b = this.buckets[idx]; const i = b.findIndex(([k]) => k === key); if (i >= 0) b[i][1] = value; else b.push([key, value]); }
-  get(key: K): V | undefined { const idx = this.hash(key); const b = this.buckets[idx]; const f = b.find(([k]) => k === key); return f?.[1]; }
-  remove(key: K) { const idx = this.hash(key); const b = this.buckets[idx]; const i = b.findIndex(([k]) => k === key); if (i >= 0) b.splice(i, 1); }
-  loadFactor() { const items = this.buckets.reduce((a, b) => a + b.length, 0); return items / this.capacity; }
-  entries() { return this.buckets.flat(); }
+  private capacity: number;
+
+  constructor(capacity = 17) {
+    this.capacity = capacity;
+    this.buckets = Array.from({ length: capacity }, () => []);
+  }
+
+  private hash(key: K) {
+    const s = String(key);
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+      h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    }
+    return h % this.capacity;
+  }
+
+  set(key: K, value: V) {
+    const idx = this.hash(key);
+    const b = this.buckets[idx];
+    const i = b.findIndex(([k]) => k === key);
+    if (i >= 0) {
+      b[i][1] = value;
+    } else {
+      b.push([key, value]);
+    }
+  }
+
+  get(key: K): V | undefined {
+    const idx = this.hash(key);
+    const b = this.buckets[idx];
+    const f = b.find(([k]) => k === key);
+    return f?.[1];
+  }
+
+  remove(key: K) {
+    const idx = this.hash(key);
+    const b = this.buckets[idx];
+    const i = b.findIndex(([k]) => k === key);
+    if (i >= 0) {
+      b.splice(i, 1);
+    }
+  }
+
+  loadFactor() {
+    const items = this.buckets.reduce((a, b) => a + b.length, 0);
+    return items / this.capacity;
+  }
+
+  entries() {
+    return this.buckets.flat();
+  }
 }
 
 // ----------------------------- UI Helpers -----------------------------
